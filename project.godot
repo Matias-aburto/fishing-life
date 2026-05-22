@@ -12,7 +12,7 @@ config_version=5
 
 config/name="fishing-life"
 config/description="Simulador de vida y pesca inspirado en Loncoche, Chile."
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/ui/multiplayer_lobby.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -23,6 +23,7 @@ TimeManager="*res://scripts/systems/time_manager.gd"
 WeatherManager="*res://scripts/systems/weather_manager.gd"
 MusicManager="*res://scripts/systems/music_manager.gd"
 GameSession="*res://scripts/systems/game_session.gd"
+NetworkManager="*res://scripts/network/network_manager.gd"
 
 [display]
 

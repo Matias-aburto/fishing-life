@@ -16,8 +16,10 @@ var _shop_ui_open := false
 func _ready() -> void:
 	local_player.add_to_group("local_player")
 
-	_player_state = GameSession.ensure_player_state()
-	_player_state.restore_starting_loadout_if_empty()
+	var game_player := local_player as GamePlayer
+	_player_state = game_player.get_player_state() if game_player else null
+	if _player_state:
+		_player_state.restore_starting_loadout_if_empty()
 	var spawn: Vector2 = interior.build()
 	local_player.global_position = spawn
 

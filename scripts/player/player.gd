@@ -5,19 +5,49 @@ const WALK_SPEED := 140.0
 const RUN_SPEED := 230.0
 
 var activity: PlayerActivity.Type = PlayerActivity.Type.IDLE
+## Réplica numérica para MultiplayerSynchronizer.
+var synced_activity: int = PlayerActivity.Type.IDLE
+
 var facing := Vector2.DOWN
 var input_blocked := false
 
 @onready var sprite: AnimatedSprite2D = $Sprite
+@onready var _camera: Camera2D = $Camera2D
+@onready var _name_label: Label = $NameLabel
+@onready var _player_state: PlayerState = $PlayerState
 
 
 func _ready() -> void:
 	sprite.sprite_frames = PlayerSpriteFramesBuilder.build()
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_setup_network_role()
 	_update_animation(true)
 
 
-func _physics_process(delta: float) -> void:
+func _setup_network_role() -> void:
+	var is_local := is_multiplayer_authority()
+	_camera.enabled = is_local
+	if is_local:
+		add_to_group("local_player")
+	var peer_id := get_multiplayer_authority()
+	_name_label.text = "Tú" if is_local else "Jugador %d" % peer_id
+	_name_label.visible = not is_local or NetworkManager.is_online()
+
+
+func get_player_state() -> PlayerState:
+	return _player_state
+
+
+func is_local_player() -> bool:
+	return is_multiplayer_authority()
+
+
+func _physics_process(_delta: float) -> void:
+	if not is_multiplayer_authority():
+		_apply_synced_activity()
+		_update_animation()
+		return
+
 	if _is_movement_locked():
 		velocity = Vector2.ZERO
 		move_and_slide()
@@ -44,6 +74,11 @@ func _physics_process(delta: float) -> void:
 	_update_animation()
 
 
+func _apply_synced_activity() -> void:
+	if activity != synced_activity:
+		activity = synced_activity as PlayerActivity.Type
+
+
 func _is_movement_locked() -> bool:
 	return input_blocked or activity in [
 		PlayerActivity.Type.FISHING_WAIT,
@@ -62,9 +97,7 @@ func _is_fishing_activity() -> bool:
 
 
 func _has_rod() -> bool:
-	if not GameSession.has_player_state():
-		return true
-	return GameSession.get_player_state().has_rod()
+	return _player_state.has_rod()
 
 
 func _update_animation(force := false) -> void:
@@ -106,6 +139,7 @@ func set_activity(new_activity: PlayerActivity.Type) -> void:
 	if activity == new_activity:
 		return
 	activity = new_activity
+	synced_activity = new_activity as int
 	_update_animation(true)
 
 
