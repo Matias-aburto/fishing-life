@@ -11,7 +11,11 @@ const SPAWN_POSITIONS: Array[Vector2] = [
 ]
 
 
-func _spawn_custom(peer_id: int) -> Node:
+func _ready() -> void:
+	spawn_function = _spawn_player_node
+
+
+func _spawn_player_node(peer_id: int) -> Node:
 	var player: GamePlayer = PLAYER_SCENE.instantiate()
 	player.name = str(peer_id)
 	player.global_position = SPAWN_POSITIONS[(peer_id - 1) % SPAWN_POSITIONS.size()]
