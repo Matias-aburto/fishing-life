@@ -1,0 +1,171 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/fishing_shop_ui.gd" id="1_shop_ui"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.96, 0.97, 0.99, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.55, 0.6, 0.68, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.22)
+shadow_size = 4
+shadow_offset = Vector2(1, 2)
+
+[node name="FishingShopUI" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("1_shop_ui")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0.05, 0.08, 0.12, 0.45)
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -210.0
+offset_top = -185.0
+offset_right = 210.0
+offset_bottom = 185.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.14, 0.18, 1)
+theme_override_font_sizes/font_size = 22
+text = "Tienda de pesca"
+horizontal_alignment = 1
+
+[node name="CoinsRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="CoinIcon" type="TextureRect" parent="Panel/Margin/VBox/CoinsRow"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+texture_filter = 0
+stretch_mode = 5
+
+[node name="CoinsLabel" type="Label" parent="Panel/Margin/VBox/CoinsRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.42, 0.12, 1)
+theme_override_font_sizes/font_size = 16
+text = "50"
+
+[node name="BuyRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="BuyIcon" type="TextureRect" parent="Panel/Margin/VBox/BuyRow"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture_filter = 0
+stretch_mode = 5
+
+[node name="ProductLabel" type="Label" parent="Panel/Margin/VBox/BuyRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.2, 0.24, 0.3, 1)
+theme_override_font_sizes/font_size = 15
+text = "Carnada — paquete de 5"
+vertical_alignment = 1
+
+[node name="BuyButton" type="Button" parent="Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 15
+text = "Comprar — 12 $"
+
+[node name="SellSeparator" type="HSeparator" parent="Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="SellTitle" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.35, 0.28, 1)
+theme_override_font_sizes/font_size = 16
+text = "Vender captura"
+horizontal_alignment = 1
+
+[node name="SellSection" type="VBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="SellFishRow" type="HBoxContainer" parent="Panel/Margin/VBox/SellSection"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="SellFishIcon" type="TextureRect" parent="Panel/Margin/VBox/SellSection/SellFishRow"]
+visible = false
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture_filter = 0
+stretch_mode = 5
+
+[node name="SellFishLabel" type="Label" parent="Panel/Margin/VBox/SellSection/SellFishRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.2, 0.24, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+text = "Sin peces para vender."
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="SellButton" type="Button" parent="Panel/Margin/VBox/SellSection"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+focus_mode = 0
+disabled = true
+theme_override_font_sizes/font_size = 15
+text = "Vender captura"
+
+[node name="MessageLabel" type="Label" parent="Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.45, 0.32, 1)
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+
+[node name="CloseButton" type="Button" parent="Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+focus_mode = 0
+text = "Cerrar"

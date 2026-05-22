@@ -1,0 +1,30 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/player/player.gd" id="1_player"]
+[ext_resource type="Script" path="res://scripts/fishing/fishing_controller.gd" id="3_fishing"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
+size = Vector2(20, 14)
+
+[node name="Player" type="CharacterBody2D" groups=["player"]]
+z_index = 10
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("1_player")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 10)
+shape = SubResource("RectangleShape2D_player")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -14)
+offset = Vector2(0, 18)
+scale = Vector2(0.2, 0.2)
+texture_filter = 0
+
+[node name="FishingController" type="Node" parent="."]
+script = ExtResource("3_fishing")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0

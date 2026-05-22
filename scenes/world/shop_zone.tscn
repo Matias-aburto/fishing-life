@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/shop_zone.gd" id="1_zone"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_zone"]
+size = Vector2(72, 56)
+
+[node name="ShopZone" type="Area2D" groups=["fishing_shop"]]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_zone")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_zone")

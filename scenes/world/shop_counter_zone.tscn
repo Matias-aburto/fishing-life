@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/shop_counter_zone.gd" id="1_counter"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_counter"]
+size = Vector2(180, 56)
+
+[node name="ShopCounterZone" type="Area2D" groups=["shop_counter"]]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_counter")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_counter")
