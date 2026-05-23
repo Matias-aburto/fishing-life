@@ -1,5 +1,5 @@
 extends MultiplayerSpawner
-## El servidor spawnea un Player por peer con autoridad correcta.
+## Spawn con spawn_function (ENet). Solo el servidor llama spawn().
 
 const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
 
@@ -11,13 +11,13 @@ const SPAWN_POSITIONS: Array[Vector2] = [
 ]
 
 
-func _ready() -> void:
-	spawn_function = _spawn_player_node
+func _enter_tree() -> void:
+	spawn_function = Callable(self, "_spawn_player_node")
 
 
 func _spawn_player_node(peer_id: int) -> Node:
 	var player: GamePlayer = PLAYER_SCENE.instantiate()
 	player.name = str(peer_id)
-	player.global_position = SPAWN_POSITIONS[(peer_id - 1) % SPAWN_POSITIONS.size()]
+	player.position = SPAWN_POSITIONS[(peer_id - 1) % SPAWN_POSITIONS.size()]
 	player.set_multiplayer_authority(peer_id)
 	return player

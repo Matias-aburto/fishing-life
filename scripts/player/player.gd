@@ -20,18 +20,25 @@ var input_blocked := false
 func _ready() -> void:
 	sprite.sprite_frames = PlayerSpriteFramesBuilder.build()
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_setup_network_role()
+	call_deferred("_setup_network_role")
 	_update_animation(true)
 
 
 func _setup_network_role() -> void:
-	var is_local := is_multiplayer_authority()
+	var is_local := is_local_player()
 	_camera.enabled = is_local
 	if is_local:
 		add_to_group("local_player")
+		if NetworkManager.solo_mode or not NetworkManager.is_online():
+			activate_camera()
 	var peer_id := get_multiplayer_authority()
 	_name_label.text = "Tú" if is_local else "Jugador %d" % peer_id
 	_name_label.visible = not is_local or NetworkManager.is_online()
+
+
+func activate_camera() -> void:
+	_camera.enabled = true
+	_camera.make_current()
 
 
 func get_player_state() -> PlayerState:
@@ -39,11 +46,11 @@ func get_player_state() -> PlayerState:
 
 
 func is_local_player() -> bool:
-	return is_multiplayer_authority()
+	return get_multiplayer_authority() == multiplayer.get_unique_id()
 
 
 func _physics_process(_delta: float) -> void:
-	if not is_multiplayer_authority():
+	if not is_local_player():
 		_apply_synced_activity()
 		_update_animation()
 		return

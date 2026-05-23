@@ -1,8 +1,18 @@
 extends Node2D
-## Mundo compartido: el servidor spawnea jugadores; cada cliente controla el suyo.
+## Mundo compartido: el servidor instancia jugadores; cada cliente controla el suyo.
+
+const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
+
+const SPAWN_POSITIONS: Array[Vector2] = [
+	Vector2(560, 520),
+	Vector2(640, 520),
+	Vector2(480, 520),
+	Vector2(560, 440),
+]
 
 @onready var _players_root: Node2D = $Players
 @onready var _player_spawner: MultiplayerSpawner = $PlayerSpawner
+@onready var _world_camera: Camera2D = $WorldCamera
 @onready var fishing_minigame: Control = $UI/FishingMinigame
 @onready var hint_label: Label = $UI/HUD/HintLabel
 @onready var status_label: Label = $UI/HUD/StatusLabel
@@ -19,6 +29,7 @@ var _return_spawn_pending := false
 
 
 func _ready() -> void:
+	_activate_world_camera_fallback()
 	_update_network_label()
 	if multiplayer.is_server():
 		_spawn_server_players()
@@ -27,16 +38,36 @@ func _ready() -> void:
 	call_deferred("_setup_local_player")
 
 
+func _activate_world_camera_fallback() -> void:
+	_world_camera.enabled = true
+	_world_camera.make_current()
+
+
 func _spawn_server_players() -> void:
-	_spawn_player(1)
+	_spawn_player(multiplayer.get_unique_id())
 	for peer_id in multiplayer.get_peers():
 		_spawn_player(peer_id)
 
 
 func _spawn_player(peer_id: int) -> void:
-	if _players_root.get_node_or_null(str(peer_id)) != null:
+	var node_name := str(peer_id)
+	if _players_root.get_node_or_null(node_name) != null:
 		return
-	_player_spawner.spawn(peer_id)
+
+	if NetworkManager.is_online():
+		if not _player_spawner.spawn_function.is_valid():
+			push_error("PlayerSpawner: spawn_function no configurado.")
+			return
+		var spawned: Node = _player_spawner.spawn(peer_id)
+		if spawned == null:
+			push_error("MultiplayerSpawner no pudo crear jugador %d" % peer_id)
+		return
+
+	var player: GamePlayer = PLAYER_SCENE.instantiate()
+	player.name = node_name
+	player.position = SPAWN_POSITIONS[(peer_id - 1) % SPAWN_POSITIONS.size()]
+	player.set_multiplayer_authority(peer_id)
+	_players_root.add_child(player)
 
 
 func _on_peer_connected(peer_id: int) -> void:
@@ -53,13 +84,20 @@ func _on_peer_disconnected(peer_id: int) -> void:
 
 
 func _setup_local_player() -> void:
+	var my_id := multiplayer.get_unique_id()
+	if multiplayer.is_server() and _players_root.get_node_or_null(str(my_id)) == null:
+		_spawn_player(my_id)
+
 	local_player = _find_local_player()
 	var attempts := 0
-	while local_player == null and attempts < 30:
+	while local_player == null and attempts < 60:
 		await get_tree().process_frame
 		local_player = _find_local_player()
 		attempts += 1
+
 	if local_player == null:
+		push_error("Jugador local no encontrado (peer %d). Revisa la consola." % my_id)
+		_activate_world_camera_fallback()
 		return
 
 	player_state = local_player.get_player_state()
@@ -76,7 +114,9 @@ func _setup_local_player() -> void:
 	inventory_hud.bind_player_state(player_state)
 	coins_hud.bind_player_state(player_state)
 
+	local_player.activate_camera()
 	_setup_camera_limits()
+	_world_camera.enabled = false
 
 	if _return_spawn_pending:
 		hint_label.text = "Volviste a la orilla del río."
@@ -121,6 +161,8 @@ func _update_network_label() -> void:
 
 func _connect_fishing_signals() -> void:
 	if _fishing == null:
+		return
+	if _fishing.hint_changed.is_connected(_on_hint_changed):
 		return
 	_fishing.hint_changed.connect(_on_hint_changed)
 	_fishing.status_changed.connect(_on_status_changed)
