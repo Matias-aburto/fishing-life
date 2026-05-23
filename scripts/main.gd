@@ -31,10 +31,13 @@ var _return_spawn_pending := false
 func _ready() -> void:
 	_activate_world_camera_fallback()
 	_update_network_label()
-	if multiplayer.is_server():
-		_spawn_server_players()
-	multiplayer.peer_connected.connect(_on_peer_connected)
-	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+	if NetworkManager.is_online():
+		if NetworkManager.is_server_role():
+			_spawn_server_players()
+		multiplayer.peer_connected.connect(_on_peer_connected)
+		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+	else:
+		_spawn_player(NetworkManager.get_local_peer_id())
 	call_deferred("_setup_local_player")
 
 
@@ -44,7 +47,7 @@ func _activate_world_camera_fallback() -> void:
 
 
 func _spawn_server_players() -> void:
-	_spawn_player(multiplayer.get_unique_id())
+	_spawn_player(NetworkManager.get_local_peer_id())
 	for peer_id in multiplayer.get_peers():
 		_spawn_player(peer_id)
 
@@ -71,7 +74,7 @@ func _spawn_player(peer_id: int) -> void:
 
 
 func _on_peer_connected(peer_id: int) -> void:
-	if multiplayer.is_server():
+	if NetworkManager.is_server_role():
 		_spawn_player(peer_id)
 
 
@@ -84,9 +87,10 @@ func _on_peer_disconnected(peer_id: int) -> void:
 
 
 func _setup_local_player() -> void:
-	var my_id := multiplayer.get_unique_id()
-	if multiplayer.is_server() and _players_root.get_node_or_null(str(my_id)) == null:
-		_spawn_player(my_id)
+	var my_id := NetworkManager.get_local_peer_id()
+	if _players_root.get_node_or_null(str(my_id)) == null:
+		if not NetworkManager.is_online() or NetworkManager.is_server_role():
+			_spawn_player(my_id)
 
 	local_player = _find_local_player()
 	var attempts := 0
@@ -124,7 +128,7 @@ func _setup_local_player() -> void:
 		status_label.visible = false
 	elif NetworkManager.is_online():
 		status_label.text = "Co-op en línea — pesca y explora con tus amigos."
-		if multiplayer.is_server():
+		if NetworkManager.is_server_role():
 			status_label.text += " (eres el host)"
 
 
@@ -153,10 +157,10 @@ func _setup_camera_limits() -> void:
 func _update_network_label() -> void:
 	if NetworkManager.solo_mode or not NetworkManager.is_online():
 		network_label.text = "Solo"
-	elif multiplayer.is_server():
+	elif NetworkManager.is_server_role():
 		network_label.text = "Host — puerto %d" % NetworkManager.DEFAULT_PORT
 	else:
-		network_label.text = "Cliente — ID %d" % multiplayer.get_unique_id()
+		network_label.text = "Cliente — ID %d" % NetworkManager.get_local_peer_id()
 
 
 func _connect_fishing_signals() -> void:

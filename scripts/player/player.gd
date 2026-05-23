@@ -46,7 +46,7 @@ func get_player_state() -> PlayerState:
 
 
 func is_local_player() -> bool:
-	return get_multiplayer_authority() == multiplayer.get_unique_id()
+	return get_multiplayer_authority() == NetworkManager.get_local_peer_id()
 
 
 func _physics_process(_delta: float) -> void:

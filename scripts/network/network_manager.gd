@@ -13,9 +13,27 @@ signal peer_left(peer_id: int)
 
 var solo_mode := false
 
+const OFFLINE_PEER_ID := 1
+
+
+func has_peer() -> bool:
+	return multiplayer.multiplayer_peer != null
+
+
+func get_local_peer_id() -> int:
+	if solo_mode or not has_peer():
+		return OFFLINE_PEER_ID
+	return multiplayer.get_unique_id()
+
+
+func is_server_role() -> bool:
+	if not is_online():
+		return true
+	return multiplayer.is_server()
+
 
 func is_online() -> bool:
-	return multiplayer.multiplayer_peer != null and not solo_mode
+	return has_peer() and not solo_mode
 
 
 func host_game(port: int = DEFAULT_PORT) -> Error:
